@@ -1,0 +1,121 @@
+
+
+#include "DAVE.h"                 //Declarations from DAVE Code Generation (includes SFR declaration)
+#define PERIODIC_TASK 1
+#define BLOCKED_TASK  0
+
+
+/**
+
+ * @brief main() - Application entry point
+ *
+ * <b>Details of function</b><br>
+ * This routine is the application entry point. It is invoked by the device startup code. It is responsible for
+ * invoking the APP initialization dispatcher routine - DAVE_Init() and hosting the place-holder for user application
+ * code.
+ */
+
+
+static void task1_handler(void* parameters);
+static void task2_handler(void* parameters);
+
+
+
+int main(void)
+{
+	TaskHandle_t task1_handle;
+	TaskHandle_t task2_handle;
+
+	BaseType_t _status;
+
+  DAVE_STATUS_t status;
+
+  status = DAVE_Init();           /* Initialization of DAVE APPs  */
+
+  if (status != DAVE_STATUS_SUCCESS)
+  {
+    /* Placeholder for error handler code. The while loop below can be replaced with an user error handler. */
+    XMC_DEBUG("DAVE APPs initialization failed\n");
+
+    while(1U)
+    {
+
+    }
+
+  }
+
+	_status = xTaskCreate(task1_handler,NULL, 200, NULL, 2, &task1_handle);
+
+	 configASSERT(_status == pdPASS);
+
+	 _status = xTaskCreate(task2_handler,NULL, 200, NULL, 2, &task2_handle);
+
+	 configASSERT(_status == pdPASS);
+
+	  vTaskStartScheduler();
+
+
+  /* Placeholder for user application code. The while loop below can be replaced with user application code. */
+  while(1U)
+  {
+
+  }
+
+
+
+}
+
+
+
+#if BLOCKED_TASK
+  	static void task1_handler(void* parameters){
+
+	while(1){
+	uint8_t Send_Data[] = "Hello_from_InfineonTask1\r\n";
+	UART_Transmit(&UART_0, Send_Data, sizeof(Send_Data)-1);
+    vTaskDelay(pdMS_TO_TICKS(1000));
+	}
+
+}
+
+static void task2_handler(void* parameters){
+
+	while(1){
+		uint8_t Send_Data[] = "Hello_from_InfineonTask2\r\n";
+		UART_Transmit(&UART_0, Send_Data, sizeof(Send_Data)-1);
+	    vTaskDelay(pdMS_TO_TICKS(800));
+		}
+
+}
+
+#endif
+
+
+
+#if PERIODIC_TASK
+
+static void task1_handler(void* parameters){
+
+	TickType_t last_wakeup_time;
+	last_wakeup_time = xTaskGetTickCount();
+	while(1){
+	uint8_t Send_Data[] = "Hello_from_InfineonTask1\r\n";
+	UART_Transmit(&UART_0, Send_Data, sizeof(Send_Data)-1);
+	vTaskDelayUntil(&last_wakeup_time,pdMS_TO_TICKS(1000));
+	}
+
+}
+
+static void task2_handler(void* parameters){
+
+	TickType_t last_wakeup_time;
+	last_wakeup_time = xTaskGetTickCount();
+	while(1){
+		uint8_t Send_Data[] = "Hello_from_InfineonTask2\r\n";
+		UART_Transmit(&UART_0, Send_Data, sizeof(Send_Data)-1);
+		vTaskDelayUntil(&last_wakeup_time,pdMS_TO_TICKS(800));
+		}
+
+}
+
+#endif
