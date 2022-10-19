@@ -1,2 +1,2 @@
 # RTOS
-### these files are based on infenion XMC4400 MCU based on ARM Cortex M4
+### These files are based on infenion XMC4400 MCU based on ARM Cortex M4
